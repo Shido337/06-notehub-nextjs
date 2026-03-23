@@ -6,16 +6,18 @@ import { fetchNotes, createNote, deleteNote } from '@/lib/api';
 import NoteList from '@/components/NoteList/NoteList';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import NoteForm from '@/components/NoteForm/NoteForm';
+import Pagination from '@/components/Pagination/Pagination';
 import css from './page.module.css';
 
 export default function NotesClient() {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['notes', search],
-    queryFn: () => fetchNotes(search),
+    queryKey: ['notes', search, page],
+    queryFn: () => fetchNotes(search, page),
   });
 
   const deleteMutation = useMutation({
@@ -31,13 +33,18 @@ export default function NotesClient() {
     },
   });
 
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
   if (isLoading) return <p>Loading, please wait...</p>;
   if (error) return <p>Could not fetch the list of notes. {error.message}</p>;
 
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
-        <SearchBox value={search} onChange={setSearch} />
+        <SearchBox value={search} onChange={handleSearchChange} />
         <button className={css.button} onClick={() => setShowForm(!showForm)}>
           Create note
         </button>
@@ -49,6 +56,14 @@ export default function NotesClient() {
         />
       )}
       {data?.notes && <NoteList notes={data.notes} onDelete={id => deleteMutation.mutate(id)} />}
+      {data?.totalPages && (
+        <Pagination
+          totalPages={data.totalPages}
+          currentPage={page}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }
+

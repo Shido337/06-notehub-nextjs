@@ -8,8 +8,12 @@ const api = axios.create({
   },
 });
 
-export const fetchNotes = async (search?: string): Promise<FetchNotesResponse> => {
-  const params: Record<string, string> = {};
+export const fetchNotes = async (
+  search?: string,
+  page = 1,
+  perPage = 12
+): Promise<FetchNotesResponse> => {
+  const params: Record<string, string | number> = { page, perPage };
   if (search) params.search = search;
   const { data } = await api.get<FetchNotesResponse>('/notes', { params });
   return data;
