@@ -1,42 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchNotes, createNote, deleteNote } from '@/lib/api';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useDebouncedCallback } from 'use-debounce';
+import { fetchNotes } from '@/lib/api';
 import NoteList from '@/components/NoteList/NoteList';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import NoteForm from '@/components/NoteForm/NoteForm';
+import Modal from '@/components/Modal/Modal';
 import Pagination from '@/components/Pagination/Pagination';
 import css from './page.module.css';
 
 export default function NotesClient() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [showForm, setShowForm] = useState(false);
-  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    setSearch(value);
+    setPage(1);
+  }, 500);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['notes', search, page],
     queryFn: () => fetchNotes(search, page),
+    placeholderData: keepPreviousData,
   });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notes'] }),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      setShowForm(false);
-    },
-  });
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
 
   if (isLoading) return <p>Loading, please wait...</p>;
   if (error) return <p>Could not fetch the list of notes. {error.message}</p>;
@@ -44,24 +33,25 @@ export default function NotesClient() {
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
-        <SearchBox value={search} onChange={handleSearchChange} />
-        <button className={css.button} onClick={() => setShowForm(!showForm)}>
-          Create note
+        <SearchBox onSearch={debouncedSearch} />
+        {data && data.totalPages > 1 && (
+          <Pagination
+            pageCount={data.totalPages}
+            currentPage={page}
+            onPageChange={setPage}
+          />
+        )}
+        <button className={css.button} onClick={() => setIsModalOpen(true)}>
+          Create note +
         </button>
       </div>
-      {showForm && (
-        <NoteForm
-          onSubmit={noteData => createMutation.mutate(noteData)}
-          onCancel={() => setShowForm(false)}
-        />
+      {data?.notes && data.notes.length > 0 && (
+        <NoteList notes={data.notes} />
       )}
-      {data?.notes && <NoteList notes={data.notes} onDelete={id => deleteMutation.mutate(id)} />}
-      {data?.totalPages && (
-        <Pagination
-          totalPages={data.totalPages}
-          currentPage={page}
-          onPageChange={setPage}
-        />
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <NoteForm onClose={() => setIsModalOpen(false)} />
+        </Modal>
       )}
     </div>
   );
