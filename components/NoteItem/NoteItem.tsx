@@ -4,7 +4,7 @@ import css from './NoteItem.module.css';
 
 interface NoteItemProps {
   item: Note;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 const NoteItem = ({ item, onDelete }: NoteItemProps) => {

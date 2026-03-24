@@ -1,5 +1,10 @@
 import axios from 'axios';
-import type { Note, FetchNotesResponse } from '@/types/note';
+import type { Note } from '@/types/note';
+
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
 
 const api = axios.create({
   baseURL: 'https://notehub-public-api.goit.global/api',
@@ -33,7 +38,7 @@ export const createNote = async (noteData: {
   return data;
 };
 
-export const deleteNote = async (id: number): Promise<Note> => {
+export const deleteNote = async (id: string): Promise<Note> => {
   const { data } = await api.delete<Note>(`/notes/${id}`);
   return data;
 };

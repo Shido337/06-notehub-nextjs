@@ -35,19 +35,13 @@ export default function NotesClient() {
       <div className={css.toolbar}>
         <SearchBox onSearch={debouncedSearch} />
         {data && data.totalPages > 1 && (
-          <Pagination
-            pageCount={data.totalPages}
-            currentPage={page}
-            onPageChange={setPage}
-          />
+          <Pagination pageCount={data.totalPages} currentPage={page} onPageChange={setPage} />
         )}
         <button className={css.button} onClick={() => setIsModalOpen(true)}>
           Create note +
         </button>
       </div>
-      {data?.notes && data.notes.length > 0 && (
-        <NoteList notes={data.notes} />
-      )}
+      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
           <NoteForm onClose={() => setIsModalOpen(false)} />
@@ -56,4 +50,3 @@ export default function NotesClient() {
     </div>
   );
 }
-

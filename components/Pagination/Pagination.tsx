@@ -2,8 +2,7 @@ import ReactPaginate from 'react-paginate';
 import css from './Pagination.module.css';
 
 const Paginate =
-  (ReactPaginate as unknown as { default: typeof ReactPaginate }).default ||
-  ReactPaginate;
+  (ReactPaginate as unknown as { default: typeof ReactPaginate }).default || ReactPaginate;
 
 interface PageChangeEvent {
   selected: number;

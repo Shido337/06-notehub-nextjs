@@ -48,13 +48,7 @@ const NoteForm = ({ onClose }: NoteFormProps) => {
 
           <div className={css.formGroup}>
             <label htmlFor="content">Content</label>
-            <Field
-              id="content"
-              name="content"
-              as="textarea"
-              rows={8}
-              className={css.textarea}
-            />
+            <Field id="content" name="content" as="textarea" rows={8} className={css.textarea} />
             <ErrorMessage name="content" component="span" className={css.error} />
           </div>
 
